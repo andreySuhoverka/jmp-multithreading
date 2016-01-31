@@ -1,29 +1,31 @@
 package com.epam.sukhoverka.jmp;
 
+import org.apache.log4j.Logger;
+
 public class Producer implements Runnable {
 
-    SharedEntity entity;
+    private static final Logger LOGGER = Logger.getLogger(Producer.class);
+    private volatile SharedEntity entity;
 
     public Producer(SharedEntity entity) {
         this.entity = entity;
     }
 
-    @Override
     public void run() {
         while (true) {
             synchronized (entity) {
                 try {
                     while (!entity.isEmpty()) {
                         entity.notify();
-                        System.out.println("Producer: force consumer thread go from wait-set to blocked-set");
-                        System.out.println("Producer: producer is going to wait-set");
+                        LOGGER.info("Producer: force consumer thread go from wait-set to blocked-set");
+                        LOGGER.info("Producer: producer is going to wait-set");
                         entity.wait();
                     }
-                    System.out.println("Producer: Put value into empty!");
+                    LOGGER.info("Producer: Put value into entity!");
                     entity.setEmpty(false);
-                    Thread.sleep(700);
+                    Thread.sleep(250);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOGGER.error("Producer - thread was interrupted: " + e.getMessage());
                 }
             }
         }
